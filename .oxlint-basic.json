@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "unicorn", "oxc", "react", "import", "jsx-a11y", "nextjs"],
+  "categories": { "correctness": "error" },
+  "env": { "builtin": true, "browser": true, "node": true },
+  "ignorePatterns": [".next/**", ".vinext/**", "out/**", "build/**", "dist/**", "coverage/**", "next-env.d.ts"]
+}
