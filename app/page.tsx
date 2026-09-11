@@ -3,6 +3,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, BarChart3, Bell, ChevronDown, CircleDollarSign, Download, FileText, HandCoins, LayoutDashboard, Menu, Package, Plus, Search, Settings, Sprout, TrendingDown, TrendingUp, Users, WalletCards, Warehouse, Wheat, X } from 'lucide-react';
+import { LoginScreen } from '@/components/login-screen';
+import { createClient } from '@/lib/supabase/client';
 
 type Lang='am'|'en'; type Business='all'|'farm'|'beverage'; type View='dashboard'|'finances'|'inventory'|'sales'|'customers'|'suppliers'|'farm'|'reports'|'settings';
 type Tx={id:number;business_id:string;type:'income'|'expense';category:string;amount:number;date:string;party?:string;description:string;payment_method:string};
@@ -16,14 +18,22 @@ const money=(n:number,l:Lang)=>`${Math.round(n).toLocaleString()} ${l==='am'?'�
 const businessName=(b:string,l:Lang)=>b==='farm'?(l==='am'?'እርሻ':'Farm'):(l==='am'?'የመጠጥ ንግድ':'Beverage');
 
 export default function Home(){
+ const [ready,setReady]=useState(false),[signedIn,setSignedIn]=useState(false);
+ useEffect(()=>{const supabase=createClient();supabase.auth.getSession().then(({data})=>{setSignedIn(Boolean(data.session));setReady(true)});const {data:listener}=supabase.auth.onAuthStateChange((_event,session)=>setSignedIn(Boolean(session)));return()=>listener.subscription.unsubscribe()},[]);
+ if(!ready)return <main className="auth-loading"><Wheat/><span>በረከት</span></main>;
+ if(!signedIn)return <LoginScreen onSignedIn={()=>setSignedIn(true)}/>;
+ return <DashboardApp/>;
+}
+
+function DashboardApp(){
  const [lang,setLang]=useState<Lang>('am'),[business,setBusiness]=useState<Business>('all'),[view,setView]=useState<View>('dashboard'),[data,setData]=useState<Data>(empty),[loading,setLoading]=useState(true),[modal,setModal]=useState<'income'|'expense'|'inventory'|'movement'|null>(null),[notice,setNotice]=useState(''),[mobile,setMobile]=useState(false); const t=copy[lang];
- const load=useCallback(()=>fetch('/api/data').then(r=>{if(!r.ok)throw Error();return r.json()}).then(setData).catch(()=>setNotice(lang==='am'?'መረጃውን ማምጣት አልተቻለም':'Could not load data')).finally(()=>setLoading(false)),[lang]);
+ const load=useCallback(()=>fetch('/api/data').then(r=>{if(!r.ok)throw Error();return r.json()}).then(value=>setData(value as Data)).catch(()=>setNotice(lang==='am'?'መረጃውን ማምጣት አልተቻለም':'Could not load data')).finally(()=>setLoading(false)),[lang]);
  useEffect(()=>{load()},[load]);
  const filtered=useMemo(()=>({transactions:data.transactions.filter(x=>business==='all'||x.business_id===business),inventory:data.inventory.filter(x=>business==='all'||x.business_id===business),parties:data.parties.filter(x=>business==='all'||x.business_id===business),crops:data.crops}),[data,business]);
  const totals=useMemo(()=>{const revenue=filtered.transactions.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),expense=filtered.transactions.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0),stock=filtered.inventory.reduce((a,x)=>a+x.quantity*x.purchase_price,0),receivable=filtered.parties.filter(x=>x.type==='customer').reduce((a,x)=>a+x.balance,0),payable=filtered.parties.filter(x=>x.type==='supplier').reduce((a,x)=>a+x.balance,0);return{revenue,expense,profit:revenue-expense,stock,receivable,payable}},[filtered]);
  const nav:[View,React.ReactNode][]=[['dashboard',<LayoutDashboard key="d"/>],['finances',<CircleDollarSign key="f"/>],['inventory',<Package key="i"/>],['sales',<HandCoins key="s"/>],['customers',<Users key="c"/>],['suppliers',<Warehouse key="u"/>],...(business!=='beverage'?[['farm',<Sprout key="r"/>] as [View,React.ReactNode]]:[]),['reports',<BarChart3 key="p"/>],['settings',<Settings key="g"/>]];
  const go=(v:View)=>{setView(v);setMobile(false)};
- return <main className="app-shell" dir={lang==='am'?'rtl':'ltr'}>
+ return <main className="app-shell" dir="ltr">
   <aside className={`sidebar ${mobile?'open':''}`}><div className="brand"><span className="brand-mark"><Wheat/></span><div><strong>{lang==='am'?'በረከት':'BEREKET'}</strong><small>{lang==='am'?'የንግድ ማዕከል':'BUSINESS HUB'}</small></div><button className="close-menu" onClick={()=>setMobile(false)}><X/></button></div><nav>{nav.map(([v,icon])=><button key={v} className={view===v?'active':''} onClick={()=>go(v)}>{icon}<span>{t[v]}</span></button>)}</nav><div className="sidebar-foot"><div className="avatar">ተ</div><div><strong>{lang==='am'?'አቶ ተስፋዬ':'Ato Tesfaye'}</strong><small>{lang==='am'?'ባለቤት':'Owner'}</small></div></div></aside>
   <section className="workspace"><header className="topbar"><button className="menu-button" onClick={()=>setMobile(true)}><Menu/></button><div className="business-wrap"><button className="business-picker"><span>{business==='farm'?'🌾':business==='beverage'?'🥤':'◉'}</span><span><small>{lang==='am'?'የተመረጠ ንግድ':'Selected business'}</small><strong>{business==='all'?t.all:businessName(business,lang)}</strong></span><ChevronDown/></button><select aria-label="Business" value={business} onChange={e=>setBusiness(e.target.value as Business)}><option value="all">{t.all}</option><option value="farm">🌾 {businessName('farm',lang)}</option><option value="beverage">🥤 {businessName('beverage',lang)}</option></select></div><div className="top-actions"><button className="language" onClick={()=>setLang(lang==='am'?'en':'am')}>{lang==='am'?'አማርኛ | English':'Amharic | English'}</button><button className="icon-button"><Bell/><i/></button><button className="add-button" onClick={()=>setModal('income')}><Plus/> {t.add}</button></div></header>
   <div className="content">{loading?<div className="loading"><span/><p>{t.loading}</p></div>:<>{view==='dashboard'&&<Dashboard {...{t,lang,totals,filtered,business,setModal}}/>}{view==='finances'&&<Finances {...{t,lang,filtered,setModal}}/>}{view==='inventory'&&<Inventory {...{t,lang,filtered,setModal}}/>}{view==='sales'&&<Finances {...{t,lang,filtered,setModal,onlySales:true}}/>}{view==='customers'&&<Parties {...{t,lang,filtered,type:'customer' as const}}/>}{view==='suppliers'&&<Parties {...{t,lang,filtered,type:'supplier' as const}}/>}{view==='farm'&&<Farm {...{t,lang,data}}/>}{view==='reports'&&<Reports {...{t,lang,totals,filtered}}/>}{view==='settings'&&<SettingsView {...{t,lang,setLang}}/>}</>}</div></section>
