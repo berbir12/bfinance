@@ -1,0 +1,25 @@
+html,
+body,
+.login-page,
+.setup-page,
+.login-form,
+.setup-card,
+.login-error {
+  direction: ltr;
+}
+
+.login-form,
+.setup-card,
+.login-error {
+  text-align: left;
+}
+
+input[type='password'] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate;
+}
+
+.mobile-nav {
+  direction: ltr;
+}

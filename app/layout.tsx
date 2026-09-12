@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './direction-fix.css';
 
 export const metadata: Metadata = {
   title: 'በረከት — የንግድ ማዕከል',
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="am" dir="rtl"><body>{children}</body></html>;
+  return <html lang="am" dir="ltr"><body>{children}</body></html>;
 }
