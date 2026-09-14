@@ -3,7 +3,7 @@ import './globals.css';
 import './direction-fix.css';
 
 export const metadata: Metadata = {
-  title: 'በረከት — የንግድ ማዕከል',
+  title: 'ብርሃኑ — የንግድ ማዕከል',
   description: 'የእርሻ እና የመጠጥ ንግድዎን በአንድ ቦታ ያስተዳድሩ።',
 };
 

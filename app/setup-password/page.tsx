@@ -34,7 +34,7 @@ export default function SetupPasswordPage() {
       <div className="setup-card">
         <div className="setup-brand"><Wheat /></div>
         {done ? (
-          <><CheckCircle2 className="setup-success" /><h1>Password created</h1><p>የይለፍ ቃልዎ በትክክል ተቀምጧል።</p><a href="/">Open Bereket dashboard</a></>
+          <><CheckCircle2 className="setup-success" /><h1>Password created</h1><p>የይለፍ ቃልዎ በትክክል ተቀምጧል።</p><a href="/">Open Birhanu dashboard</a></>
         ) : (
           <><KeyRound className="setup-key" /><small>ONE-TIME ACCOUNT SETUP</small><h1>Create your password</h1><p>Username: <strong>birhanukinfu</strong></p><form onSubmit={submit}><label><span>New password</span><input type="password" value={password} onChange={e => setPassword(e.target.value)} minLength={10} required autoComplete="new-password" /></label><label><span>Confirm password</span><input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} minLength={10} required autoComplete="new-password" /></label>{error ? <div className="login-error">{error}</div> : null}<button disabled={busy}>{busy ? 'Saving…' : 'Save password'}</button></form></>
         )}
