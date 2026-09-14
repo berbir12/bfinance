@@ -12,7 +12,8 @@
     "lint": "oxlint --config .oxlint-basic.json app db",
     "format": "oxfmt",
     "db:generate": "drizzle-kit generate",
-    "auth:create-password-reset": "node scripts/create-password-reset.mjs"
+    "auth:create-password-reset": "node scripts/create-password-reset.mjs",
+    "db:remove-demo": "node scripts/remove-demo-data.mjs"
   },
   "dependencies": {
     "react": "19.2.6",
